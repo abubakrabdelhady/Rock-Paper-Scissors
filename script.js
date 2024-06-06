@@ -11,38 +11,77 @@ function getComputerChoice() {
     return choices[choice];
 }
 
-function getHumanChoice() {
+function getHumanChoice(round) {
     let finalChoice;
+    // if human choice is not right repeat the question
     while(!choices.includes(finalChoice)) {
-        let choice = prompt(`Enter your choice (Rock or Paper or Scissors)`);
+        if(finalChoice !== undefined) {
+            alert(`Wrong choice: ${finalChoice}, Please enter right choice`);
+        }
+        let choice = prompt(`ROUND ${round} | Enter your choice (Rock or Paper or Scissors)`);
         finalChoice = choice.toLowerCase();
     }
     return finalChoice;
 }
 
 function doesFirstWin(firstChoice, SecondChoice) {
+    // Rock beats scissors, scissors beat paper, and paper beats rock.
     return (('rock'===firstChoice && 'scissors'===SecondChoice) ||
             ('scissors'===firstChoice && 'paper'===SecondChoice) ||
             ('paper'===firstChoice && 'rock'===SecondChoice));
 }
 
-function playRound(humanChoice, computerChoice) {
-    // Rock beats scissors, scissors beat paper, and paper beats rock.
-    if(humanChoice === computerChoice) {
-        console.log(`No winner! Tie!`);
+function playRound(round) {
+    let humanChoice;
+    let computerChoice;
+    let resultMsg;
+
+    // If tie repeat the round
+    while(humanChoice === computerChoice) {
+        if(humanChoice !== undefined) {
+            alert(`It is TIE! Please repeat the round!`);
+        }
+        humanChoice = getHumanChoice(round);
+        computerChoice = getComputerChoice();
     }
 
     if(doesFirstWin(humanChoice, computerChoice)) {
         humanScore++;
-        console.log(`You Won! ${humanChoice} beats ${computerChoice}`);
+        resultMsg = `You Won! ${humanChoice} beats ${computerChoice}`;
     }
 
     if(doesFirstWin(computerChoice, humanChoice)) {
         computerScore++;
-        console.log(`You Lose! ${computerChoice} beats ${humanChoice}`);
+        resultMsg = `You Lose! ${computerChoice} beats ${humanChoice}`;
     }
 
-    console.log(humanScore, computerScore);
+    alert(`
+        ROUND ${round} | ${resultMsg}.
+        Current Score: You: ${humanScore} | Computer: ${computerScore}.
+    `)
 }
 
-playRound(getHumanChoice(), getComputerChoice());
+function playGame(rounds) {
+    let winnerScore = Math.floor(rounds/2) + 1;
+    let round = 1;
+    while(round<=rounds && winnerScore>humanScore && winnerScore>computerScore) {
+        playRound(round);
+        round++;
+    }
+    showFinalResult();
+}
+
+function showFinalResult() {
+    let finalResultMsg;
+    if(humanScore > computerScore) {
+        finalResultMsg = `Congratulations! You Won!`;
+    } else {
+        finalResultMsg = `Sorry! You Lose!`;
+    }
+    alert(`
+        Final Result | ${finalResultMsg}.
+        Final Score: You: ${humanScore} | Computer: ${computerScore}
+    `)
+}
+
+playGame(5);
