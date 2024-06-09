@@ -7,34 +7,50 @@ let computerScore = 0;
 let humanChoice;
 let computerChoice;
 
-let curRound = 0;
+let curRound0;
 let noOfRounds;
+let winnerScore = 0;
 
 const roundsChoices = document.querySelectorAll('.rounds > ul > li');
 const roundsTitle = document.querySelector('.rounds > h2');
 const message = document.querySelector('.message');
 const scoreBox = document.querySelector('.score');
+const roundScore = document.querySelector('.round-score');
+const refresh = document.querySelector('.refresh');
+refresh.addEventListener('click', function(e) {
+    roundsTitle.textContent = "Please select number of rounds";
+    roundsChoices.forEach((item) => item.style.display = 'inline');
+    noOfRounds = undefined;
+    setMsg('Please select number of rounds first!')
+    setRoundScore('');
+    setScore('');
+    e.target.style.display = 'none';
+})
 roundsChoices.forEach(function(item) {
-    if(noOfRounds !== undefined) {
-        return;
-    }
     item.addEventListener('click', function(e) {
+        if(noOfRounds !== undefined) {
+            return;
+        }
         noOfRounds = parseInt(e.target.textContent);
+        winnerScore = Math.floor(noOfRounds/2) + 1;
+        curRound = 1;
+
         const siblings = [...item.parentNode.children];
         roundsTitle.textContent = "Number of Rounds:";
         siblings.forEach((sibling) => {if(sibling !== item) sibling.style.display = 'none'});
-        curRound = 1;
-        let roundMsg = getRoundMsg();
-        setMsg(roundMsg);
+        
+        setMsg(getRoundMsg());
+        setScore(getScoreMsg());
     })
 })
 const setMsg = (msg) => message.textContent = msg;
+const setRoundScore = (score) => roundScore.textContent = score;
 const setScore = (score) => scoreBox.textContent = score;
 
 const choicesSelections = document.querySelectorAll('.choice img');
 choicesSelections.forEach((choice) => {
     choice.addEventListener('click', function(e) {
-        if(humanChoice !== undefined || noOfRounds === undefined) {
+        if(humanChoice !== undefined || curRound === undefined) {
             return;
         }
         humanChoice = e.target.dataset.choice;
@@ -47,8 +63,16 @@ const getRoundMsg = function() {
     return `ROUND ${curRound} | Select your choice (Rock-Paper-Scissors?)`;
 }
 
-const getCurScoreMsg = function() {
-    return `Current Score: You: ${humanScore} | Computer: ${computerScore}.`;
+const getScoreMsg = function() {
+    return `Score: You: ${humanScore} | Computer: ${computerScore}.`;
+}
+
+const getFinalScoreMsg = function() {
+    if(humanScore > computerScore) {
+        return `Congratulations! You Won!`;
+    } else {
+        return `Sorry! You Lose!`;
+    }
 }
 
 const calcRound = function() {
@@ -67,14 +91,20 @@ const calcRound = function() {
         scoreMsg = `You Lose Round ${curRound}! ${computerChoice} beats ${humanChoice}`;
         curRound++;
     }
-    scoreMsg += "\n "+getCurScoreMsg();
 
-    setScore(scoreMsg);
-
-    let roundMsg = getRoundMsg();
-    setMsg(roundMsg);
-
+    setRoundScore(scoreMsg);
+    setScore(getScoreMsg());
+    
     humanChoice = computerChoice = undefined;
+    
+    if(curRound > noOfRounds || winnerScore <= humanScore || winnerScore <=computerScore) {
+        setMsg(getFinalScoreMsg());
+        curRound = undefined;
+        humanScore = computerScore = 0;
+        refresh.style.display = 'inline';
+    } else {
+        setMsg(getRoundMsg());
+    }
 }
 
 const doesHumanWin = function() {
